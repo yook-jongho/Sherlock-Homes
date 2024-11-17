@@ -1,14 +1,24 @@
 <template>
     <header>
-        <img src="../assets/logoImg.png" />
+        <img src="../assets/logoImg.png" alt="Logo" />
         <div class="item" v-for="(menu, index) in menus" :key="index">
             <span @click="toggleDropdown(index)">{{ menu.label }}</span>
             <transition name="slide-down">
-                <SelectOption v-if="showDropdown[index]" />
+                <div v-if="showDropdown[index]" class="optionBox">
+                    <span
+                        v-for="option in menu.options"
+                        :key="option"
+                        @click="updateHeader(menu.label, option)"
+                        class="option"
+                        :class="{ selected: isSelected(menu.label, option) }"
+                    >
+                        {{ option }}
+                    </span>
+                </div>
             </transition>
         </div>
         <div class="login">
-            <img src="../assets/login.png" />
+            <img src="../assets/login.png" alt="Login" />
             <span>로그인</span>
         </div>
     </header>
@@ -16,19 +26,33 @@
 
 <script setup>
 import { ref } from "vue";
-import SelectOption from "./SelectOption.vue";
+import { userChoiceState } from "@/stores/store.js";
 
-// 메뉴 데이터 배열
-const menus = [{ label: "아파트" }, { label: "단독 / 다가구" }];
+const userChoice = userChoiceState();
 
-// 각 메뉴별로 드롭다운 상태 관리
-const showDropdown = ref(menus.map(() => false));
+const isSelected = (menu, option) => {
+    return (
+        userChoice.header.menu === menu && userChoice.header.option === option
+    );
+};
+// 메뉴 데이터
+const menus = ref([
+    { label: "아파트", options: ["매매", "전세", "월세"] },
+    { label: "단독 / 다가구", options: ["매매", "전세", "월세"] },
+]);
 
-// 드롭다운 토글 함수
+// 드롭다운 상태 관리
+const showDropdown = ref(menus.value.map(() => false));
+
+// 드롭다운 토글
 const toggleDropdown = (index) => {
     showDropdown.value = showDropdown.value.map((state, i) =>
         i === index ? !state : false
     );
+};
+
+const updateHeader = (menu, option) => {
+    userChoice.updateHeader({ menu, option });
 };
 </script>
 
@@ -59,5 +83,44 @@ header {
     display: flex;
     align-items: center;
     cursor: pointer;
+}
+
+.optionBox {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 7px 33px;
+
+    position: absolute; /* 부모 요소를 기준으로 독립적인 위치 */
+    top: 195%; /* "아파트" 아래에 위치 */
+    left: 0; /* 왼쪽 정렬 */
+
+    width: 247px;
+    height: 49px;
+
+    background: #f9f7f7;
+    box-shadow: 0px 4px 100px rgba(214, 217, 240, 0.5);
+    border-radius: 0px 0px 10px 20px;
+    border-top: 4px solid #112d4e;
+
+    z-index: 100;
+}
+
+.option:hover {
+    font-weight: bold; /* 볼드체 */
+}
+
+.option.selected {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 5px 13px;
+    gap: 10px;
+
+    background: #3f72af;
+    border-radius: 50px;
+    color: white;
 }
 </style>
