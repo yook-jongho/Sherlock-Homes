@@ -61,9 +61,9 @@ const updateHeader = (menu, option) => {
 header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 200px;
     padding: 15px 50px;
-    background: #f9f7f7;
+    background: var(--background-color);
     min-width: 1200px;
     height: 70px;
 }
@@ -75,6 +75,7 @@ header {
     align-items: center;
     font-size: 10px;
     gap: 5px;
+    margin-left: auto;
 }
 
 /* 메뉴 아이템 스타일 */
@@ -83,6 +84,8 @@ header {
     display: flex;
     align-items: center;
     cursor: pointer;
+    font-size: 20px;
+    font-family: "pretendard_medium";
 }
 
 .optionBox {
@@ -99,14 +102,18 @@ header {
     width: 247px;
     height: 49px;
 
-    background: #f9f7f7;
+    background: var(--background-color);
     box-shadow: 0px 4px 100px rgba(214, 217, 240, 0.5);
     border-radius: 0px 0px 10px 20px;
-    border-top: 4px solid #112d4e;
+    border-top: 4px solid var(--primary-color);
 
     z-index: 100;
 }
 
+.option {
+    font-size: medium;
+    font-family: "pretendard_light";
+}
 .option:hover {
     font-weight: bold; /* 볼드체 */
 }
@@ -119,8 +126,8 @@ header {
     padding: 5px 13px;
     gap: 10px;
 
-    background: #3f72af;
+    background: var(--secondary-color);
     border-radius: 50px;
-    color: white;
+    color: var(--background-color);
 }
 </style>

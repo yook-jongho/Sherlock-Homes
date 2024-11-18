@@ -1,5 +1,5 @@
 <template>
-    <div ref="mapContainer" style="width: 100%; height: 100vh"></div>
+    <div ref="mapContainer" class="mapContainer"></div>
 </template>
 
 <script setup>
@@ -16,7 +16,10 @@ onMounted(() => {
     const map = new kakao.maps.Map(mapContainer.value, options);
 });
 </script>
-
 <style scoped>
+.mapContainer {
+    width: 100%;
+    height: calc(100vh - 70px);
+}
 /* 필요 시 스타일 추가 */
 </style>

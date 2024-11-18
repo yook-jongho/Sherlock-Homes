@@ -1,4 +1,21 @@
 /* Reset.css */
+@font-face {
+    font-family: 'pretendard_medium';
+    src: url('../../public/fonts/PRETENDARD-MEDIUM.TTF');
+}
+@font-face {
+    font-family: 'pretendard_regular';
+    src: url('../../public/fonts/PRETENDARD-REGULAR.TTF');
+}
+@font-face {
+    font-family: 'pretendard_light';
+    src: url('../../public/fonts/PRETENDARD-LIGHT.TTF');
+}
+@font-face {
+    font-family: 'pretendard_bold';
+    src: url('../../public/fonts/PRETENDARD-BOLD.TTF');
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -30,3 +47,12 @@
     opacity: 0; /* 투명하게 사라짐 */
     transform: translateY(-20px); /* 위로 올라가면서 사라짐 */
 }
+
+
+:root {
+    --primary-color: #112d4e;
+    --secondary-color: #3f72af;
+    --background-color: #f9f7f7;
+    --text-color: #112d4e;
+    --basic-color: #000000;
+  }
