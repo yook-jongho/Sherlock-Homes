@@ -16,6 +16,7 @@ import LocationSelect from "@/components/LocationSelect.vue";
     gap: 25px;
 
     width: 45%;
+    min-width: 400px;
     height: calc(100vh - 70px);
 
     background: #ffffff;

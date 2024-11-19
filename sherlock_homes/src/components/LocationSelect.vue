@@ -1,22 +1,39 @@
 <template>
     <div class="container">
         <div class="locationBox">
-            <span>시도 선택</span>
+            <span @click="getCityInfo">시도 선택</span>
+            <span> > </span>
             <span>시군구 선택</span>
-            <span>읍면동 선택</span>
+            <!-- <span> > </span>
+            <span>읍면동 선택</span> -->
         </div>
         <div class="itemBox">
-            <span>서울시</span>
-            <span>서울시</span>
-            <span>서울시</span>
-            <span>서울시</span>
-            <span>서울시</span>
-            <span>서울시</span>
-            <span>서울시</span>
+            <span v-for="item in cities" :key="item.code">
+                {{ item.name }}
+            </span>
         </div>
     </div>
 </template>
-<script setup></script>
+<script setup>
+import { apiClient } from "../util/Api.js";
+import { ref } from "vue";
+
+const cities = ref([]);
+const crntCity = ref({});
+
+const getCityInfo = async () => {
+    try {
+        // TODO:
+        const response = await apiClient.get(
+            "http://3.39.93.101:8084/api/map/si"
+        );
+        cities.value = response.data;
+        console.log(cities.value);
+    } catch (error) {
+        console.error("Error fetching user:", error);
+    }
+};
+</script>
 <style scoped>
 .container {
     display: flex;
@@ -46,10 +63,9 @@
 .locationBox {
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    padding: 3px 22px;
-    gap: 53px;
+    padding: 10px 22px;
 
     background: var(--secondary-color);
     border-radius: 3px;
@@ -61,7 +77,6 @@
     /* 매매 */
 
     font-family: "pretendard_regular";
-    letter-spacing: 0.05em;
     color: #ffffff;
 }
 
@@ -78,20 +93,14 @@
 .itemBox span {
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    align-items: center;
     padding: 5px;
-    gap: 10px;
 
-    background: #3f72af;
-    border-radius: 3px;
-
+    font-size: small;
     font-family: "pretendard_regular";
-    color: var(--background-color);
 
     /* 각 아이템의 너비 설정 */
-    flex: 1 1 calc(25% - 10px); /* 한 줄에 4개 배치 (25%) */
-    max-width: calc(25% - 10px); /* 최대 너비 제한 */
-    box-sizing: border-box; /* 패딩과 경계 포함 */
+    flex: 1 1 calc(33% - 10px); /* 한 줄에 4개 배치 (25%) */
+    border: 1px solid #3f72af; /* 테두리 색상 */
+    border-radius: 3px; /* 테두리 둥글게 */
 }
 </style>
