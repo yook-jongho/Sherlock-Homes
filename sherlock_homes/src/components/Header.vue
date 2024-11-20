@@ -3,6 +3,15 @@
         <img src="../assets/logoImg.png" alt="Logo" />
         <div class="item" v-for="(menu, index) in menus" :key="index">
             <span @click="toggleDropdown(index)">{{ menu.label }}</span>
+            <div>
+                <span
+                    class="subtitle"
+                    v-for="option in menu.options"
+                    :key="option"
+                >
+                    {{ option }} /
+                </span>
+            </div>
             <transition name="slide-down">
                 <div v-if="showDropdown[index]" class="optionBox">
                     <span
@@ -62,7 +71,7 @@ header {
     display: flex;
     align-items: center;
     gap: 200px;
-    padding: 15px 50px;
+    padding: 0px 15px;
     background: var(--background-color);
     min-width: 1200px;
     height: 70px;
@@ -82,10 +91,16 @@ header {
 .item {
     position: relative;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     cursor: pointer;
     font-size: 20px;
-    font-family: "pretendard_medium";
+    font-family: "pretendard_bold";
+    color: var(--primary-color);
+    .subtitle {
+        color: var(--secondary-color);
+        font-size: 13px;
+        font-family: "pretendard_regular";
+    }
 }
 
 .optionBox {
@@ -96,7 +111,7 @@ header {
     padding: 7px 33px;
 
     position: absolute; /* 부모 요소를 기준으로 독립적인 위치 */
-    top: 195%; /* "아파트" 아래에 위치 */
+    top: 115%; /* "아파트" 아래에 위치 */
     left: 0; /* 왼쪽 정렬 */
 
     width: 247px;
