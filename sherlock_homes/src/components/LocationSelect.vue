@@ -22,7 +22,7 @@
         <div class="selectionBox">
             <span v-if="locations.city">시도: {{ locations.city.name }}</span>
             <span v-if="locations.district"
-                >시군구: {{ locations.district.name }}</span
+                >시군구: {{ getTrimmedName(locations.district.name) }}</span
             >
             <span v-if="locations.neighborhood"
                 >읍면동: {{ locations.neighborhood }}</span
@@ -77,7 +77,7 @@ const setItem = (item) => {
 const getCityInfo = async (step) => {
     let apiUrl = "";
     if (step === "시도 선택") apiUrl = "http://3.39.93.101:8084/api/map/si";
-    if (step === "시군구 선택" && locations.value.city.code)
+    if (step === "시군구 선택" && locations.value.city)
         apiUrl = `http://3.39.93.101:8084/api/map/gu?si=${locations.value.city.code}`;
     // if (step === "읍면동 선택" && locations.value.시군구)
     // apiUrl = `http://3.39.93.101:8084/api/map/emd?sggCode=${locations.value.district}`;
