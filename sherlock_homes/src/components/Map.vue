@@ -11,6 +11,7 @@ const mapStore = useMapStore();
 
 let map; // 지도 객체
 let polygon; // 폴리곤 객체
+let infoWindows = [];
 
 onMounted(() => {
     if (!mapContainer.value) return; // 방어 코드
@@ -41,11 +42,20 @@ watch(
     { immediate: true }
 );
 
+watch(
+    () => mapStore.aptList,
+    (newAptList) => {
+        if (newAptList) {
+            neighborhoodApts();
+        }
+    }
+);
+
 // 지도 중심 이동
 const moveMapCenterByAddress = () => {
     const geocoder = new kakao.maps.services.Geocoder();
     const userChoice = userChoiceState(); // store 사용
-    const { city, district, neighborhood } = userChoice.location;
+    const { city, district } = userChoice.location;
 
     if (!city.name || !district.name) {
         console.error("지도 이동 실패: 위치 정보가 충분하지 않습니다.");
@@ -54,7 +64,7 @@ const moveMapCenterByAddress = () => {
 
     // 주소 생성 (예: "서울특별시 강남구 역삼동")
     const address = `${city.name} ${district.name} `;
-    console.log(address);
+
     geocoder.addressSearch(address, function (result, status) {
         if (status === kakao.maps.services.Status.OK) {
             const kakaoCenter = new kakao.maps.LatLng(result[0].y, result[0].x);
@@ -96,6 +106,87 @@ const drawBoundary = () => {
     } catch (error) {
         console.error("경계 처리 중 에러:", error);
     }
+};
+
+const neighborhoodApts = () => {
+    const geocoder = new kakao.maps.services.Geocoder();
+    const userChoice = userChoiceState(); // store 사용
+    const { city, district, neighborhood } = userChoice.location;
+    const address = `${city.name} ${district.name} ${neighborhood.name}`;
+    console.log(address);
+
+    if (!city.name || !district.name || !neighborhood.name) {
+        console.error("지도 이동 실패: 위치 정보가 충분하지 않습니다.");
+        return;
+    }
+
+    geocoder.addressSearch(address, function (result, status) {
+        if (status === kakao.maps.services.Status.OK) {
+            const kakaoCenter = new kakao.maps.LatLng(result[0].y, result[0].x);
+            map.setCenter(kakaoCenter); // 지도 중심 이동
+            map.setLevel(6); // 지도 중심 이동
+        } else {
+            console.error("주소 검색 실패: ", status);
+        }
+    });
+
+    const aptList = mapStore.aptList;
+
+    // aptList 순회하며 마커 생성
+    aptList.forEach((apt) => {
+        const address = `${apt.si} ${apt.gu} ${apt.dong} ${apt.roadNm}`;
+
+        geocoder.addressSearch(address, (result, status) => {
+            if (status === kakao.maps.services.Status.OK) {
+                const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                // 마커 생성
+                const marker = new kakao.maps.Marker({
+                    map: map,
+                    position: coords,
+                });
+
+                // 마커에 표시할 정보 생성
+                const infoWindowContent = `
+                    <div style="padding: 10px; font-size: 14px;">
+                        <strong>${apt.aptNm}</strong><br>
+                        <span>가격: ${apt.dealAmount}만원</span>
+                    </div>
+                `;
+
+                const infoWindow = new kakao.maps.InfoWindow({
+                    content: infoWindowContent,
+                });
+
+                infoWindow.open(map, marker);
+
+                // InfoWindow를 배열에 추가
+                infoWindows.push(infoWindow);
+
+                // 마커 클릭 이벤트
+                kakao.maps.event.addListener(marker, "click", () => {
+                    toggleInfoWindow(infoWindow, marker);
+                });
+            } else {
+                console.error(`주소 검색 실패: ${address}`, status);
+            }
+        });
+    });
+};
+
+const toggleInfoWindow = (infoWindow, marker) => {
+    const isOpen = infoWindow.getMap(); // InfoWindow가 열려 있는지 확인
+    if (isOpen) {
+        infoWindow.close(); // 열려 있으면 닫기
+    } else {
+        closeAllInfoWindows(); // 다른 InfoWindow 모두 닫기
+        infoWindow.open(map, marker); // 현재 InfoWindow 열기
+    }
+};
+
+// 모든 InfoWindow 닫기
+const closeAllInfoWindows = () => {
+    infoWindows.forEach((infoWindow) => infoWindow.close());
 };
 </script>
 <style scoped>

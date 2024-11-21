@@ -20,17 +20,28 @@
             >
         </div>
         <div class="selectionBox" v-if="locations.city">
-            <span v-if="locations.city">시도: {{ locations.city.name }}</span>
-            <span v-if="locations.district"
-                >시군구: {{ getTrimmedName(locations.district.name) }}</span
-            >
-            <span v-if="locations.neighborhood"
-                >읍면동: {{ locations.neighborhood }}</span
-            >
-            <button v-if="locations.district" @click="showDistrictMap">
-                해당 시군구 지도 보기
-            </button>
+            <span v-if="locations.city">{{ locations.city.name }}</span>
+            <span v-if="locations.district">{{
+                getTrimmedName(locations.district.name)
+            }}</span>
+            <span v-if="locations.neighborhood">{{
+                locations.neighborhood.name
+            }}</span>
         </div>
+        <button
+            class="map-button"
+            v-if="locations.district"
+            @click="showDistrictMap"
+        >
+            > 해당 시군구 지도 이동
+        </button>
+        <button
+            class="map-button"
+            v-if="locations.neighborhood"
+            @click="getAptData"
+        >
+            > 해당 읍면동 지도 이동
+        </button>
         <div class="itemBox">
             <table>
                 <tbody>
@@ -66,7 +77,7 @@ const locations = ref({
     district: null,
     neighborhood: null,
 });
-const activeStep = ref("시도 선택"); // 현재 활성화된 단계
+const activeStep = ref(""); // 현재 활성화된 단계
 const setActiveStep = (step) => {
     console.log(step);
     activeStep.value = step;
@@ -93,6 +104,7 @@ const getCityInfo = async (step) => {
             const response = await apiClient.get(apiUrl);
             // cities.value = response.data;
             cities.value = response.data.payload;
+            console.log(cities.value);
         } catch (error) {
             console.error(`Error fetching ${step} data:`, error);
         }
@@ -113,12 +125,18 @@ const selectLocation = (item) => {
         locations.value.neighborhood = null;
 
         userChoice.location.city = item;
+        userChoice.location.district = null;
+        userChoice.location.neighborhood = null;
     } else if (activeStep.value === "시군구 선택") {
         locations.value.district = item;
         userChoice.location.district = item;
+
+        locations.value.neighborhood = null;
+        userChoice.location.neighborhood = null;
     } else if (activeStep.value === "읍면동 선택") {
-        locations.value.neighborhood = item.code;
-        updateCity();
+        locations.value.neighborhood = item;
+        userChoice.location.neighborhood = item;
+        // updateCity();
     }
 };
 
@@ -135,28 +153,17 @@ const updateCity = () => {
     userChoice.updateLocation(locations.value);
 };
 
-// 모든 선택이 완료되었을 때 API 요청
-watch(
-    locations,
-    (newVal) => {
-        if (newVal.city && newVal.district) {
-            // fetchFinalData();
-        }
-    },
-    { deep: true }
-);
-
-const fetchFinalData = async () => {
+const getAptData = async () => {
     try {
-        const response = await apiClient.post(
-            "http://3.39.93.101:8084/api/final",
-            {
-                city: locations.value.city,
-                district: locations.value.district,
-                neighborhood: locations.value.neighborhood,
-            }
+        const response = await apiClient.get(
+            `http://3.39.93.101:8081/api/apt/trade/dong/${locations.value.neighborhood.name}`
         );
-        console.log("Final Data:", response.data);
+        if (response.data.payload.length === 0) {
+            alert("데이터가 없습니다");
+            return;
+        }
+        const aptList = response.data.payload;
+        mapStore.setAptList(aptList);
     } catch (error) {
         console.error("Error fetching final data:", error);
     }
@@ -171,18 +178,35 @@ const chunkedCities = computed(() => {
             ...item,
             name: getTrimmedName(item.name, activeStep.value), // 이름 가공
         }))
-        .filter(
-            (item, index, self) =>
-                item &&
-                item.name &&
-                self.findIndex((i) => i.code === item.code) === index
-        );
+        .filter((item, index, self) => {
+            // 조건 분기: activeStep에 따라 고유값 확인 방식 변경
+            if (activeStep.value === "읍면동 선택") {
+                // guname + name으로 중복 제거
+                return (
+                    item &&
+                    item.name &&
+                    self.findIndex(
+                        (i) => i.guname === item.guname && i.name === item.name
+                    ) === index
+                );
+            } else {
+                // 기존 방식: code로 중복 제거
+                return (
+                    item &&
+                    item.name &&
+                    self.findIndex((i) => i.code === item.code) === index
+                );
+            }
+        });
+
+    console.log(validCities);
 
     // 청크 데이터 생성
     const chunks = [];
     for (let i = 0; i < validCities.length; i += chunkSize) {
         chunks.push(validCities.slice(i, i + chunkSize));
     }
+    console.log(chunks);
     return chunks;
 });
 
@@ -201,7 +225,6 @@ const showDistrictMap = () => {
     const selectedDistrict = koreaData.features.find(
         (feature) => feature.properties.SIG_CD === selectedSigCode
     );
-    console.log(selectedDistrict.geometry.coordinates);
 
     if (
         selectedDistrict &&
@@ -237,6 +260,7 @@ const showDistrictMap = () => {
 }
 
 .locationBox,
+.selectionBox,
 .itemBox {
     width: 100%; /* 부모 컨테이너와 동일한 너비 */
 }
@@ -268,24 +292,36 @@ const showDistrictMap = () => {
 }
 
 .selectionBox {
-    padding: 10px;
-    background: #f7f7f7;
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
-    width: 100%;
-    font-family: "pretendard_regular";
-    font-size: 14px;
-    color: #333;
     display: flex;
-    flex-direction: column;
     gap: 5px;
 }
 
 .selectionBox span {
-    font-weight: bold;
+    display: inline-block;
+    padding: 7px;
+    align-content: center;
+    text-align: center;
+    border-radius: 20px;
+    font-family: "pretendard_regular";
+    font-size: 14px;
+    background: var(--secondary-color);
+    color: var(--background-color);
+}
+
+.map-button {
+    padding: 10px;
+    margin-right: auto;
+    background-color: #ffffff;
+    font-family: "pretendard_bold";
+    border: 0.5px solid var(--secondary-color);
+    border: 0.5px solid #e1e1e1;
+    border-radius: 50px;
+    filter: drop-shadow(0px 4px 100px rgba(0, 0, 0, 0.15));
+    cursor: pointer;
 }
 
 .itemBox {
+    height: 300px;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap; /* 줄 바꿈 허용 */
@@ -294,6 +330,7 @@ const showDistrictMap = () => {
     padding: 3px 10px;
     gap: 10px; /* 아이템 간 간격 */
     cursor: pointer;
+    overflow: auto;
 }
 
 .itemBox table {

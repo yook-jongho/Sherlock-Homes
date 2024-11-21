@@ -28,6 +28,7 @@ export const userChoiceState = defineStore("userChoiceState", {
 export const useMapStore = defineStore("mapStore", {
     state: () => ({
         selectedDistrictCode: null, // 선택된 시군구 코드
+        aptList: null,
         coordinates: null,
     }),
     actions: {
@@ -36,6 +37,9 @@ export const useMapStore = defineStore("mapStore", {
         },
         setCoordinates(coordinates) {
             this.coordinates = coordinates;
-        }
+        },
+        setAptList(aptList) {
+            this.aptList = aptList;
+        },
     },
 });

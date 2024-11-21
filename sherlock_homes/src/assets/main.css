@@ -1,19 +1,19 @@
 /* Reset.css */
 @font-face {
-    font-family: 'pretendard_medium';
-    src: url('../../public/fonts/PRETENDARD-MEDIUM.TTF');
+    font-family: "pretendard_medium";
+    src: url("../../public/fonts/PRETENDARD-MEDIUM.TTF");
 }
 @font-face {
-    font-family: 'pretendard_regular';
-    src: url('../../public/fonts/PRETENDARD-REGULAR.TTF');
+    font-family: "pretendard_regular";
+    src: url("../../public/fonts/PRETENDARD-REGULAR.TTF");
 }
 @font-face {
-    font-family: 'pretendard_light';
-    src: url('../../public/fonts/PRETENDARD-LIGHT.TTF');
+    font-family: "pretendard_light";
+    src: url("../../public/fonts/PRETENDARD-LIGHT.TTF");
 }
 @font-face {
-    font-family: 'pretendard_bold';
-    src: url('../../public/fonts/PRETENDARD-BOLD.TTF');
+    font-family: "pretendard_bold";
+    src: url("../../public/fonts/PRETENDARD-BOLD.TTF");
 }
 
 body {
@@ -48,11 +48,33 @@ body {
     transform: translateY(-20px); /* 위로 올라가면서 사라짐 */
 }
 
-
 :root {
     --primary-color: #112d4e;
     --secondary-color: #3f72af;
     --background-color: #f9f7f7;
     --text-color: #112d4e;
     --basic-color: #000000;
-  }
+}
+
+/* 전체 스크롤바 영역 */
+::-webkit-scrollbar {
+    width: 12px; /* 스크롤바 너비 */
+    height: 12px; /* 가로 스크롤바 높이 */
+}
+
+/* 스크롤바 트랙 (배경) */
+::-webkit-scrollbar-track {
+    background: #f0f0f0; /* 트랙 배경색 */
+    border-radius: 10px; /* 둥근 모서리 */
+}
+
+/* 스크롤바 썸(핸들) */
+::-webkit-scrollbar-thumb {
+    background: #888; /* 썸 색상 */
+    border-radius: 10px; /* 둥근 모서리 */
+}
+
+/* 썸에 호버(hover) 시 */
+::-webkit-scrollbar-thumb:hover {
+    background: #555; /* 호버 시 색상 */
+}
