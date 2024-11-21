@@ -19,7 +19,7 @@
                 >읍면동 선택</span
             >
         </div>
-        <div class="selectionBox">
+        <div class="selectionBox" v-if="locations.city">
             <span v-if="locations.city">시도: {{ locations.city.name }}</span>
             <span v-if="locations.district"
                 >시군구: {{ getTrimmedName(locations.district.name) }}</span
@@ -27,6 +27,9 @@
             <span v-if="locations.neighborhood"
                 >읍면동: {{ locations.neighborhood }}</span
             >
+            <button v-if="locations.district" @click="showDistrictMap">
+                해당 시군구 지도 보기
+            </button>
         </div>
         <div class="itemBox">
             <table>
@@ -53,6 +56,8 @@
 import { apiClient } from "../util/Api.js";
 import { ref, computed, watch } from "vue";
 import { userChoiceState } from "@/stores/store.js";
+import { useMapStore } from "@/stores/store.js";
+import koreaData from "../json/korea.json";
 
 const userChoice = userChoiceState();
 const cities = ref([]);
@@ -79,15 +84,15 @@ const getCityInfo = async (step) => {
     if (step === "시도 선택") apiUrl = "http://3.39.93.101:8084/api/map/si";
     if (step === "시군구 선택" && locations.value.city)
         apiUrl = `http://3.39.93.101:8084/api/map/gu?si=${locations.value.city.code}`;
-    // if (step === "읍면동 선택" && locations.value.시군구)
-    // apiUrl = `http://3.39.93.101:8084/api/map/emd?sggCode=${locations.value.district}`;
+    if (step === "읍면동 선택" && locations.value.district)
+        apiUrl = `http://3.39.93.101:8084/api/map/dong?gu=${locations.value.district.name}`;
 
     if (apiUrl) {
         try {
             console.log(apiUrl);
             const response = await apiClient.get(apiUrl);
-            cities.value = response.data;
-            //TODO cities.value = response.data.payload;
+            // cities.value = response.data;
+            cities.value = response.data.payload;
         } catch (error) {
             console.error(`Error fetching ${step} data:`, error);
         }
@@ -104,13 +109,13 @@ const handleCitySelection = (step) => {
 const selectLocation = (item) => {
     if (activeStep.value === "시도 선택") {
         locations.value.city = item;
-        console.log(locations.value.city);
-        // setActiveStep("시군구 선택");
-        // getCityInfo("시군구 선택");
+        locations.value.district = null;
+        locations.value.neighborhood = null;
+
+        userChoice.location.city = item;
     } else if (activeStep.value === "시군구 선택") {
         locations.value.district = item;
-        // setActiveStep("읍면동 선택");
-        // getCityInfo("읍면동 선택");
+        userChoice.location.district = item;
     } else if (activeStep.value === "읍면동 선택") {
         locations.value.neighborhood = item.code;
         updateCity();
@@ -121,9 +126,6 @@ const getTrimmedName = (name) => {
     if (activeStep.value === "시군구 선택" && locations.value.city) {
         // 시도 이름 제거
         return name.replace(locations.value.city.name, "").trim();
-    } else if (activeStep.value === "읍면동 선택" && locations.value.district) {
-        // 시군구 이름 제거
-        return name.replace(locations.value.district.name, "").trim();
     }
     return name; // 기본 반환
 };
@@ -161,13 +163,62 @@ const fetchFinalData = async () => {
 };
 
 const chunkedCities = computed(() => {
-    const chunkSize = 3; // 한 행에 표시할 아이템 수
-    const result = [];
-    for (let i = 0; i < cities.value.length; i += chunkSize) {
-        result.push(cities.value.slice(i, i + chunkSize));
+    const chunkSize = 3;
+
+    // 빈 값 및 중복 데이터 제거
+    const validCities = cities.value
+        .map((item) => ({
+            ...item,
+            name: getTrimmedName(item.name, activeStep.value), // 이름 가공
+        }))
+        .filter(
+            (item, index, self) =>
+                item &&
+                item.name &&
+                self.findIndex((i) => i.code === item.code) === index
+        );
+
+    // 청크 데이터 생성
+    const chunks = [];
+    for (let i = 0; i < validCities.length; i += chunkSize) {
+        chunks.push(validCities.slice(i, i + chunkSize));
     }
-    return result;
+    return chunks;
 });
+
+const mapStore = useMapStore();
+
+const showDistrictMap = () => {
+    // 전역 상태에서 선택된 시군구 코드 가져오기
+    const selectedSigCode = locations.value.district.code; // Pinia 상태에서 코드 가져오기
+
+    if (!selectedSigCode) {
+        console.error("선택된 시군구 코드가 없습니다.");
+        return;
+    }
+
+    // JSON 데이터에서 선택된 시군구 찾기
+    const selectedDistrict = koreaData.features.find(
+        (feature) => feature.properties.SIG_CD === selectedSigCode
+    );
+    console.log(selectedDistrict.geometry.coordinates);
+
+    if (
+        selectedDistrict &&
+        Array.isArray(selectedDistrict.geometry.coordinates)
+    ) {
+        const coordinates = selectedDistrict.geometry.coordinates;
+
+        // 지도 데이터 설정
+        mapStore.setDistrictData(selectedSigCode);
+        mapStore.setCoordinates(coordinates);
+    } else {
+        console.error(
+            "Invalid district data or no match found:",
+            selectedDistrict
+        );
+    }
+};
 </script>
 <style scoped>
 .container {
@@ -217,7 +268,6 @@ const chunkedCities = computed(() => {
 }
 
 .selectionBox {
-    margin-top: 10px;
     padding: 10px;
     background: #f7f7f7;
     border: 1px solid #e0e0e0;

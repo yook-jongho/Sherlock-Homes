@@ -12,12 +12,11 @@ import LocationSelect from "@/components/LocationSelect.vue";
     /* Auto layout */
     display: flex;
     flex-direction: column;
-    /* align-items: center; */
     padding: 10px;
     gap: 25px;
 
     width: 25%;
-
+    min-width: 310px;
     background: #ffffff;
     box-shadow: 0px 20px 10px 2px rgba(0, 0, 0, 0.25);
     border-radius: 3px;

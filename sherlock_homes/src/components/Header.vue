@@ -128,6 +128,7 @@ header {
 .option {
     font-size: medium;
     font-family: "pretendard_light";
+    padding: 5px 13px;
 }
 .option:hover {
     font-weight: bold; /* 볼드체 */

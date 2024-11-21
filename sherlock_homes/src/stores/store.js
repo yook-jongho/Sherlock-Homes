@@ -24,3 +24,18 @@ export const userChoiceState = defineStore("userChoiceState", {
         },
     },
 });
+
+export const useMapStore = defineStore("mapStore", {
+    state: () => ({
+        selectedDistrictCode: null, // 선택된 시군구 코드
+        coordinates: null,
+    }),
+    actions: {
+        setDistrictData(code) {
+            this.selectedDistrictCode = code;
+        },
+        setCoordinates(coordinates) {
+            this.coordinates = coordinates;
+        }
+    },
+});
