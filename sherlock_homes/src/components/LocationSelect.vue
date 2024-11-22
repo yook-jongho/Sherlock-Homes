@@ -1,65 +1,76 @@
 <template>
     <div class="container">
-        <div class="locationBox">
-            <span
-                :class="{ selected: activeStep === '시도 선택' }"
-                @click="handleCitySelection('시도 선택')"
-                >시도 선택</span
+        <span class="title"
+            >검색 조건
+            <img
+                @click="setToggle"
+                src="../assets/under.svg"
+                style="cursor: pointer"
+        /></span>
+        <div v-if="toggle" class="filterContainer">
+            <div class="locationBox">
+                <span
+                    :class="{ selected: activeStep === '시도 선택' }"
+                    @click="handleCitySelection('시도 선택')"
+                    >시도 선택</span
+                >
+                <span> > </span>
+                <span
+                    :class="{ selected: activeStep === '시군구 선택' }"
+                    @click="handleCitySelection('시군구 선택')"
+                    >시군구 선택</span
+                >
+                <span> > </span>
+                <span
+                    :class="{ selected: activeStep === '읍면동 선택' }"
+                    @click="handleCitySelection('읍면동 선택')"
+                    >읍면동 선택</span
+                >
+            </div>
+            <div class="selectionBox" v-if="locations.city">
+                <span v-if="locations.city">{{ locations.city.name }}</span>
+                <span v-if="locations.district">{{
+                    getTrimmedName(locations.district.name)
+                }}</span>
+                <span v-if="locations.neighborhood">{{
+                    locations.neighborhood.name
+                }}</span>
+            </div>
+            <button
+                class="map-button"
+                v-if="locations.district"
+                @click="showDistrictMap"
             >
-            <span> > </span>
-            <span
-                :class="{ selected: activeStep === '시군구 선택' }"
-                @click="handleCitySelection('시군구 선택')"
-                >시군구 선택</span
+                > 해당 시군구 지도 이동
+            </button>
+            <button
+                class="map-button"
+                v-if="locations.neighborhood"
+                @click="getAptData"
             >
-            <span> > </span>
-            <span
-                :class="{ selected: activeStep === '읍면동 선택' }"
-                @click="handleCitySelection('읍면동 선택')"
-                >읍면동 선택</span
-            >
-        </div>
-        <div class="selectionBox" v-if="locations.city">
-            <span v-if="locations.city">{{ locations.city.name }}</span>
-            <span v-if="locations.district">{{
-                getTrimmedName(locations.district.name)
-            }}</span>
-            <span v-if="locations.neighborhood">{{
-                locations.neighborhood.name
-            }}</span>
-        </div>
-        <button
-            class="map-button"
-            v-if="locations.district"
-            @click="showDistrictMap"
-        >
-            > 해당 시군구 지도 이동
-        </button>
-        <button
-            class="map-button"
-            v-if="locations.neighborhood"
-            @click="getAptData"
-        >
-            > 해당 읍면동 지도 이동
-        </button>
-        <div class="itemBox">
-            <table>
-                <tbody>
-                    <tr
-                        v-for="(row, rowIndex) in chunkedCities"
-                        :key="rowIndex"
-                    >
-                        <td
-                            @click="setItem(item)"
-                            v-for="item in row"
-                            :key="item.code"
-                            :class="{ selected: selectedItem === item.name }"
+                > 해당 읍면동 지도 이동
+            </button>
+            <div class="itemBox">
+                <table>
+                    <tbody>
+                        <tr
+                            v-for="(row, rowIndex) in chunkedCities"
+                            :key="rowIndex"
                         >
-                            {{ getTrimmedName(item.name) }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            <td
+                                @click="setItem(item)"
+                                v-for="item in row"
+                                :key="item.code"
+                                :class="{
+                                    selected: selectedItem === item.name,
+                                }"
+                            >
+                                {{ getTrimmedName(item.name) }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </template>
@@ -70,6 +81,10 @@ import { userChoiceState } from "@/stores/store.js";
 import { useMapStore } from "@/stores/store.js";
 import koreaData from "../json/korea.json";
 
+const toggle = ref(true);
+const setToggle = () => {
+    toggle.value = !toggle.value;
+};
 const userChoice = userChoiceState();
 const cities = ref([]);
 const locations = ref({
@@ -236,10 +251,7 @@ const showDistrictMap = () => {
         mapStore.setDistrictData(selectedSigCode);
         mapStore.setCoordinates(coordinates);
     } else {
-        console.error(
-            "Invalid district data or no match found:",
-            selectedDistrict
-        );
+        console.alert("해당 시군구의 정보는 없습니다");
     }
 };
 </script>
@@ -250,13 +262,26 @@ const showDistrictMap = () => {
     justify-content: center;
     align-items: center;
     gap: 16px;
+}
 
-    background: #fdfdfd;
-    border-radius: 0px 10px 10px 10px;
+.filterContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-    width: 90%; /* 부모 컨테이너의 너비를 기준으로 설정 */
-    min-width: 300px; /* 원하는 최대 너비 (예: 600px) */
-    box-sizing: border-box; /* 패딩 포함 계산 */
+.title {
+    display: flex;
+    align-content: center;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    border-spacing: 10px;
+    border-bottom: 1px solid;
+    font-size: large;
+    font-family: "pretendard_bold";
+    padding-bottom: 10px;
 }
 
 .locationBox,
@@ -321,13 +346,12 @@ const showDistrictMap = () => {
 }
 
 .itemBox {
-    height: 300px;
+    max-height: 300px;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap; /* 줄 바꿈 허용 */
     align-items: flex-start;
     align-content: flex-start;
-    padding: 3px 10px;
     gap: 10px; /* 아이템 간 간격 */
     cursor: pointer;
     overflow: auto;
@@ -339,7 +363,6 @@ const showDistrictMap = () => {
 }
 
 .itemBox td {
-    width: 100px;
     padding: 10px; /* 셀 내부 간격 */
     border: 1px solid #f5f5f5; /* 셀 테두리 */
     font-size: small;
