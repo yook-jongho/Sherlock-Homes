@@ -271,6 +271,25 @@ const showDistrictMap = () => {
     gap: 10px;
 }
 
+.filterContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .title {
     display: flex;
     align-content: center;
