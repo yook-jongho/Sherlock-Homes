@@ -1,5 +1,5 @@
 <template>
-    <div class="card">
+    <div class="card" @click="clickAptCard">
         <div class="card-header">
             <span>{{ aptData.aptNm }}</span>
             <img src="../assets/bookmark.svg" class="bookmark" />
@@ -7,7 +7,7 @@
         <div class="card-main">
             <span style="font-size: small">최근 매매 거래가</span>
             <span style="font-size: large; font-weight: 600">
-                {{ aptData.dealAmount }} 만원
+                {{ formatCurrency(aptData.dealAmount) }} 원
             </span>
         </div>
         <div class="card-footer">
@@ -20,13 +20,38 @@
     </div>
 </template>
 <script setup>
-import { defineProps } from "vue";
+import { defineProps, computed } from "vue";
+import { useMapStore } from "@/stores/store.js";
+
+const mapStore = useMapStore();
 const props = defineProps({
     aptData: {
         type: Object,
         required: true,
     },
 });
+const formatCurrency = (amount) => {
+    let numericAmount = parseInt(amount.replace(/,/g, ""), 10) * 10000;
+
+    if (numericAmount >= 100000000) {
+        const billion = Math.floor(numericAmount / 100000000);
+        const remainder = numericAmount % 100000000;
+        const million = Math.floor(remainder / 10000);
+        return million > 0 ? `${billion}억 ${million}만` : `${billion}억`;
+    } else if (numericAmount >= 10000) {
+        return `${Math.floor(numericAmount / 10000)}만`;
+    } else {
+        return `${numericAmount.toLocaleString()}원`;
+    }
+};
+
+const aptDetailsInfo = () => {
+    // TODO: apt 상세정보 api 요청
+};
+
+const clickAptCard = () => {
+    mapStore.setAptLocation(props.aptData.roadNm);
+};
 </script>
 <style scoped>
 .bookmark {

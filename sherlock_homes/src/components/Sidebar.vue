@@ -2,6 +2,7 @@
     <div class="sidebar">
         <LocationSelect></LocationSelect>
         <div class="aptContainer">
+            <span v-if="aptList">검색결과({{ aptList.length }})</span>
             <div v-for="(apt, index) in aptList" :key="index">
                 <AptInfoCard :aptData="apt" />
             </div>

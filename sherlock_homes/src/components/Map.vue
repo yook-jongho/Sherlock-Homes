@@ -44,6 +44,15 @@ watch(
 );
 
 watch(
+    () => mapStore.aptLocation,
+    (newAptLoca) => {
+        if (newAptLoca) {
+            focusApt();
+        }
+    }
+);
+
+watch(
     () => mapStore.aptList,
     (newAptList) => {
         if (newAptList) {
@@ -215,6 +224,69 @@ const toggleInfoWindow = (infoWindow, marker) => {
 // 모든 InfoWindow 닫기
 const closeAllInfoWindows = () => {
     infoWindows.forEach((infoWindow) => infoWindow.close());
+};
+
+let markers = []; // 지도에 표시된 마커들을 저장하는 배열
+
+const focusApt = () => {
+    const geocoder = new kakao.maps.services.Geocoder();
+
+    // 주소로 좌표를 검색합니다
+    geocoder.addressSearch(mapStore.aptLocation, function (result, status) {
+        // 정상적으로 검색이 완료됐으면
+        if (status === kakao.maps.services.Status.OK) {
+            const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+            // 지도 중심 이동
+            map.setCenter(coords);
+            map.setLevel(2);
+
+            // 기존 마커 제거
+            clearMarkers();
+
+            // 새 마커 생성
+            const marker = new kakao.maps.Marker({
+                position: coords,
+                map: map, // 지도에 표시
+            });
+
+            // 새 마커를 markers 배열에 추가
+            markers.push(marker);
+
+            // 인포윈도우 내용
+            const infoWindowContent = `
+                <div style="padding: 10px; font-size: 14px;">
+                    <strong>아파트</strong><br>
+                    <span>주소: ${mapStore.aptLocation}</span>
+                </div>
+            `;
+
+            // 인포윈도우 생성
+            const infoWindow = new kakao.maps.InfoWindow({
+                content: infoWindowContent,
+            });
+
+            // 마커 클릭 이벤트 등록
+            kakao.maps.event.addListener(marker, "click", () => {
+                toggleInfoWindow(infoWindow, marker);
+            });
+
+            // 인포윈도우 열기
+            closeAllInfoWindows(); // 기존 열려있는 인포윈도우 닫기
+            infoWindow.open(map, marker); // 현재 마커에 인포윈도우 열기
+        } else {
+            console.error("주소 검색 실패:", status);
+        }
+    });
+};
+
+// 기존 마커 제거 함수
+const clearMarkers = () => {
+    markers.forEach((marker) => {
+        console.log(marker);
+        marker.setMap(null); // 지도에서 마커 제거
+    });
+    markers = []; // 배열 초기화
 };
 </script>
 <style scoped>
