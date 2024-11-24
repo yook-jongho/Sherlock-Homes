@@ -5,6 +5,7 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import { useMapStore, userChoiceState } from "@/stores/store.js";
+import { formatCurrency } from "@/util/util.js";
 
 const mapContainer = ref(null);
 const mapStore = useMapStore();
@@ -44,9 +45,9 @@ watch(
 );
 
 watch(
-    () => mapStore.aptLocation,
-    (newAptLoca) => {
-        if (newAptLoca) {
+    () => mapStore.selectedApt,
+    (newselectedApt) => {
+        if (newselectedApt) {
             focusApt();
         }
     }
@@ -155,32 +156,22 @@ const neighborhoodApts = async () => {
                             result[0].x
                         );
 
-                        // 마커 생성
-                        const marker = new kakao.maps.Marker({
-                            position: coords,
-                        });
-
-                        // 마커에 표시할 정보 생성
-                        const infoWindowContent = `
-                            <div style="padding: 10px; font-size: 14px;">
+                        //
+                        const content = `
+                            <div style="padding: 10px; font-size: 14px; background: #fff; border: 0.2px solid var(--primary-color)">
                                 <strong>${apt.aptNm}</strong><br>
-                                <span>가격: ${apt.dealAmount}만원</span>
+                                <span>가격: ${formatCurrency(
+                                    apt.dealAmount
+                                )}원</span>
                             </div>
                         `;
 
-                        const infoWindow = new kakao.maps.InfoWindow({
-                            content: infoWindowContent,
+                        const customOverlay = new kakao.maps.CustomOverlay({
+                            position: coords,
+                            content: content,
                         });
 
-                        // InfoWindow 배열 관리
-                        infoWindows.push(infoWindow);
-
-                        // 마커 클릭 이벤트
-                        kakao.maps.event.addListener(marker, "click", () => {
-                            toggleInfoWindow(infoWindow, marker);
-                        });
-
-                        resolve(marker); // 마커 반환
+                        resolve(customOverlay); // 마커 반환
                     } else {
                         console.error(`주소 검색 실패: ${address}`, status);
                         resolve(null); // 실패 시 null 반환
@@ -211,82 +202,25 @@ const neighborhoodApts = async () => {
     clusterer.addMarkers(markers); // 새로운 마커 추가
 };
 
-const toggleInfoWindow = (infoWindow, marker) => {
-    const isOpen = infoWindow.getMap(); // InfoWindow가 열려 있는지 확인
-    if (isOpen) {
-        infoWindow.close(); // 열려 있으면 닫기
-    } else {
-        closeAllInfoWindows(); // 다른 InfoWindow 모두 닫기
-        infoWindow.open(map, marker); // 현재 InfoWindow 열기
-    }
-};
-
-// 모든 InfoWindow 닫기
-const closeAllInfoWindows = () => {
-    infoWindows.forEach((infoWindow) => infoWindow.close());
-};
-
 let markers = []; // 지도에 표시된 마커들을 저장하는 배열
 
 const focusApt = () => {
     const geocoder = new kakao.maps.services.Geocoder();
 
     // 주소로 좌표를 검색합니다
-    geocoder.addressSearch(mapStore.aptLocation, function (result, status) {
-        // 정상적으로 검색이 완료됐으면
-        if (status === kakao.maps.services.Status.OK) {
-            const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+    geocoder.addressSearch(
+        mapStore.selectedApt.roadNm,
+        function (result, status) {
+            // 정상적으로 검색이 완료됐으면
+            if (status === kakao.maps.services.Status.OK) {
+                const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
 
-            // 지도 중심 이동
-            map.setCenter(coords);
-            map.setLevel(2);
-
-            // 기존 마커 제거
-            clearMarkers();
-
-            // 새 마커 생성
-            const marker = new kakao.maps.Marker({
-                position: coords,
-                map: map, // 지도에 표시
-            });
-
-            // 새 마커를 markers 배열에 추가
-            markers.push(marker);
-
-            // 인포윈도우 내용
-            const infoWindowContent = `
-                <div style="padding: 10px; font-size: 14px;">
-                    <strong>아파트</strong><br>
-                    <span>주소: ${mapStore.aptLocation}</span>
-                </div>
-            `;
-
-            // 인포윈도우 생성
-            const infoWindow = new kakao.maps.InfoWindow({
-                content: infoWindowContent,
-            });
-
-            // 마커 클릭 이벤트 등록
-            kakao.maps.event.addListener(marker, "click", () => {
-                toggleInfoWindow(infoWindow, marker);
-            });
-
-            // 인포윈도우 열기
-            closeAllInfoWindows(); // 기존 열려있는 인포윈도우 닫기
-            infoWindow.open(map, marker); // 현재 마커에 인포윈도우 열기
-        } else {
-            console.error("주소 검색 실패:", status);
+                // 지도 중심 이동
+                map.setCenter(coords);
+                map.setLevel(1);
+            }
         }
-    });
-};
-
-// 기존 마커 제거 함수
-const clearMarkers = () => {
-    markers.forEach((marker) => {
-        console.log(marker);
-        marker.setMap(null); // 지도에서 마커 제거
-    });
-    markers = []; // 배열 초기화
+    );
 };
 </script>
 <style scoped>

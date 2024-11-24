@@ -8,12 +8,14 @@
             </div>
         </div>
     </div>
+    <AptDetailsCard />
 </template>
 <script setup>
 import { computed } from "vue";
 import { useMapStore } from "@/stores/store.js";
 import LocationSelect from "@/components/LocationSelect.vue";
 import AptInfoCard from "@/components/AptInfoCard.vue";
+import AptDetailsCard from "./AptDetailsCard.vue";
 
 const mapStore = useMapStore();
 const aptList = computed(() => mapStore.aptList);

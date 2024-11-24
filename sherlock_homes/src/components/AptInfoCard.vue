@@ -7,21 +7,23 @@
         <div class="card-main">
             <span style="font-size: small">최근 매매 거래가</span>
             <span style="font-size: large; font-weight: 600">
-                {{ formatCurrency(aptData.dealAmount) }} 원
+                {{ formatCurrency(aptData.dealAmount) }}원
             </span>
         </div>
         <div class="card-footer">
             <span
                 >{{ aptData.dealY }}.{{ aptData.dealM }}.{{ aptData.dealD }} /
-                {{ aptData.floor }} 층 / {{ aptData.size }}평</span
+                {{ aptData.floor }} 층 /
+                {{ squareMeterToPyeong(aptData.exduUseAr) }}평</span
             >
-            <button>detail</button>
+            <button @click="">detail</button>
         </div>
     </div>
 </template>
 <script setup>
 import { defineProps, computed } from "vue";
 import { useMapStore } from "@/stores/store.js";
+import { formatCurrency } from "@/util/util.js";
 
 const mapStore = useMapStore();
 const props = defineProps({
@@ -30,19 +32,10 @@ const props = defineProps({
         required: true,
     },
 });
-const formatCurrency = (amount) => {
-    let numericAmount = parseInt(amount.replace(/,/g, ""), 10) * 10000;
 
-    if (numericAmount >= 100000000) {
-        const billion = Math.floor(numericAmount / 100000000);
-        const remainder = numericAmount % 100000000;
-        const million = Math.floor(remainder / 10000);
-        return million > 0 ? `${billion}억 ${million}만` : `${billion}억`;
-    } else if (numericAmount >= 10000) {
-        return `${Math.floor(numericAmount / 10000)}만`;
-    } else {
-        return `${numericAmount.toLocaleString()}원`;
-    }
+const squareMeterToPyeong = (squareMeter) => {
+    const conversionRate = 3.305785; // 1평 = 3.305785 제곱미터
+    return (squareMeter / conversionRate).toFixed(1);
 };
 
 const aptDetailsInfo = () => {
@@ -50,7 +43,7 @@ const aptDetailsInfo = () => {
 };
 
 const clickAptCard = () => {
-    mapStore.setAptLocation(props.aptData.roadNm);
+    mapStore.setSelectedApt(props.aptData);
 };
 </script>
 <style scoped>

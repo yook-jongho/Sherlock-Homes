@@ -30,7 +30,7 @@ export const useMapStore = defineStore("mapStore", {
         selectedDistrictCode: null, // 선택된 시군구 코드
         aptList: null,
         coordinates: null,
-        aptLocation: null,
+        selectedApt: null,
     }),
     actions: {
         setDistrictData(code) {
@@ -42,8 +42,8 @@ export const useMapStore = defineStore("mapStore", {
         setAptList(aptList) {
             this.aptList = aptList;
         },
-        setAptLocation(aptLocation) {
-            this.aptLocation = aptLocation;
+        setSelectedApt(selectedApt) {
+            this.selectedApt = selectedApt;
         },
     },
 });
