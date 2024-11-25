@@ -22,17 +22,15 @@
     </div>
 </template>
 <script setup>
-import { defineProps, computed } from "vue";
-import { userChoiceState } from "@/stores/store.js";
+import { ref, defineProps } from "vue";
 
 const props = defineProps(["actvieStep", "chunkedCities"]);
 const emit = defineEmits(["valueSelected"]);
 
-const userChoice = userChoiceState();
+const selectedItem = ref(null);
 const onSelectItem = (item) => {
-    console.log(item.name, item.code);
-    const selectedValue = item; // 선택된 값
-    emit("valueSelected", selectedValue); // 이벤트와 선택된 값 전달
+    selectedItem.value = item.name; // 선택된 값
+    emit("valueSelected", item); // 이벤트와 선택된 값 전달
 };
 </script>
 <style scoped>

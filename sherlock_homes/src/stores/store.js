@@ -52,6 +52,21 @@ export const useMapStore = defineStore("mapStore", {
         },
         setAptUrl(aptImg) {
             this.aptImg = aptImg;
-        }
+        },
+    },
+});
+
+export const useRegionStore = defineStore("region", {
+    state: () => ({
+        regions: {},
+    }),
+    actions: {
+        addRegions(cityCode, data) {
+            this.regions[cityCode] = data;
+            console.log("시군구 추가!!", this.regions[cityCode]);
+        },
+        getRegionData(cityCode) {
+            return this.regions[cityCode] || null;
+        },
     },
 });

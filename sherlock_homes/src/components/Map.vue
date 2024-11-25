@@ -124,7 +124,6 @@ const neighborhoodApts = async () => {
     const userChoice = userChoiceState(); // store 사용
     const { city, district, neighborhood } = userChoice.location;
     const address = `${city.name} ${district.name} ${neighborhood.name}`;
-    console.log(address);
 
     if (!city.name || !district.name || !neighborhood.name) {
         console.error("지도 이동 실패: 위치 정보가 충분하지 않습니다.");

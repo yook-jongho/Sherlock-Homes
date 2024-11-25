@@ -59,12 +59,22 @@
     </div>
 </template>
 <script setup>
+import { ref, computed, onMounted } from "vue";
 import { apiClient } from "../util/Api.js";
-import { ref, computed, watch } from "vue";
-import { userChoiceState } from "@/stores/store.js";
-import { useMapStore } from "@/stores/store.js";
+import {
+    userChoiceState,
+    useMapStore,
+    useRegionStore,
+} from "@/stores/store.js";
 import SectionTable from "@/components/SectionTable.vue";
 import koreaData from "../json/korea.json";
+
+onMounted(() => {
+    // "시도 선택" 단계에서 캐싱된 데이터 확인 및 로드
+    getCityInfo("시도 선택");
+});
+
+const regionStore = useRegionStore();
 
 const toggle = ref(true);
 const setToggle = () => {
@@ -77,37 +87,83 @@ const locations = ref({
     district: null,
     neighborhood: null,
 });
-const activeStep = ref(""); // 현재 활성화된 단계
+const activeStep = ref("시도 선택"); // 현재 활성화된 단계
 const setActiveStep = (step) => {
-    console.log(step);
     activeStep.value = step;
 };
 
 const selectedItem = ref(); // 현재 선택한 목록
 const handleValueSelected = (value) => {
     selectedItem.value = value; // 자식에서 전달받은 값 저장
-    console.log("Selected Value from Child:", value);
     selectLocation(value);
 };
 
 const getCityInfo = async (step) => {
     let apiUrl = "";
-    if (step === "시도 선택") apiUrl = "http://3.39.93.101:8084/api/map/si";
-    if (step === "시군구 선택" && locations.value.city)
+
+    if (step === "시도 선택") {
+        const startTime = performance.now(); // 수행 시간 측정 시작
+
+        // LocalStorage에서 데이터 확인
+        const cachedData = localStorage.getItem("cities");
+        if (cachedData) {
+            cities.value = JSON.parse(cachedData);
+            const endTime = performance.now(); // 수행 시간 측정 종료
+            console.log(
+                `(캐싱된 데이터 사용) 데이터 로딩 시간: ${
+                    endTime - startTime
+                }ms`
+            );
+            return; // 캐싱된 데이터 사용 후 종료
+        }
+        apiUrl = "http://3.39.93.101:8084/api/map/si";
+    }
+
+    if (step === "시군구 선택" && locations.value.city) {
+        const startTime = performance.now(); // 수행 시간 측정 시작
+        const cityCode = locations.value.city.code;
+        const cachedData = regionStore.getRegionData(cityCode);
+        if (cachedData) {
+            cities.value = cachedData;
+            const endTime = performance.now(); // 수행 시간 측정 종료
+            console.log(
+                `(캐싱된 데이터 사용) 데이터 로딩 시간: ${
+                    endTime - startTime
+                }ms`
+            );
+            return; // 캐싱된 데이터 사용 후 종료
+        }
         apiUrl = `http://3.39.93.101:8084/api/map/gu?si=${locations.value.city.code}`;
-    if (step === "읍면동 선택" && locations.value.district)
+    }
+    if (step === "읍면동 선택" && locations.value.district) {
         apiUrl = `http://3.39.93.101:8084/api/map/dong?gu=${locations.value.district.name}`;
+    }
 
     if (apiUrl) {
+        const startTime = performance.now(); // 수행 시간 측정 시작
         try {
-            console.log(apiUrl);
             const response = await apiClient.get(apiUrl);
-            // cities.value = response.data;
             cities.value = response.data.payload;
-            console.log(cities.value);
+
+            // 시/도 데이터 캐싱
+            if (step === "시도 선택") {
+                localStorage.setItem(
+                    "cities",
+                    JSON.stringify(response.data.payload)
+                );
+                console.log("시/도 데이터를 캐싱하였습니다.");
+            }
+            if (step === "시군구 선택") {
+                regionStore.addRegions(
+                    locations.value.city.code,
+                    response.data.payload
+                );
+            }
         } catch (error) {
             console.error(`Error fetching ${step} data:`, error);
         }
+        const endTime = performance.now(); // 수행 시간 측정 종료
+        console.log(`(API 요청) 데이터 로딩 시간: ${endTime - startTime}ms`);
     }
 };
 
@@ -199,14 +255,11 @@ const chunkedCities = computed(() => {
             }
         });
 
-    console.log(validCities);
-
     // 청크 데이터 생성
     const chunks = [];
     for (let i = 0; i < validCities.length; i += chunkSize) {
         chunks.push(validCities.slice(i, i + chunkSize));
     }
-    console.log(chunks);
     return chunks;
 });
 
