@@ -8,29 +8,27 @@
             <button class="back-button" @click="closeDetail">뒤로가기</button>
         </div>
         <div class="header">
-            <span> {{ mapStore.selectedApt.aptNm }}</span>
+            <span class="aptName"> {{ mapStore.selectedApt.aptNm }}</span>
             <img src="../assets/bookmark.svg" class="bookmark" />
         </div>
-        <table>
-            <tr>
-                <td>거래일자</td>
-                <td>층수</td>
-                <td>평</td>
-                <td>금액</td>
-            </tr>
-        </table>
+        <span class="subTitle">거래내역</span>
+        <AptTransHistory />
+        <span class="subTitle">가격 추이</span>
+        <AptTransGraph />
     </div>
 </template>
 
 <script setup>
 import { ref, watch } from "vue";
-import { useMapStore } from "@/stores/store";
+import { useMapStore } from "@/stores/store.js";
+import { squareMeterToPyeong, formatCurrency } from "@/util/util.js";
+import AptTransHistory from "@/components/AptTransHistory.vue";
+import AptTransGraph from "@/components/AptTransGraph.vue";
 
 const mapStore = useMapStore();
 const toggle = ref(false);
 const openDetail = () => {
     toggle.value = true;
-    console.log("상세보기 발동!!");
 };
 const closeDetail = () => {
     toggle.value = false;
@@ -46,10 +44,17 @@ watch(
 
 <style scoped>
 .container {
-    width: 25%;
+    width: 35%;
+    max-height: calc(100vh - 90px);
     padding: 10px;
     display: flex;
     flex-direction: column;
+    gap: 15px;
+    overflow: auto;
+}
+
+.container::-webkit-scrollbar {
+    display: none;
 }
 
 .image-container {
@@ -80,9 +85,23 @@ watch(
     display: flex;
     justify-content: space-between;
 }
+.aptName {
+    font-weight: 600;
+    font-size: large;
+}
 
 .bookmark {
     width: 20px;
     height: 20px;
+    cursor: pointer;
+}
+
+.subTitle {
+    display: inline-block;
+    width: 100%;
+    padding-bottom: 10px;
+    border-bottom: 1px solid;
+    font-size: large;
+    font-family: "pretendard_bold";
 }
 </style>

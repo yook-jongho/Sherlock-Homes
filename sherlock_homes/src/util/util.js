@@ -12,3 +12,8 @@ export const formatCurrency = (amount) => {
         return `${numericAmount.toLocaleString()}원`;
     }
 };
+
+export const squareMeterToPyeong = (squareMeter) => {
+    const conversionRate = 3.305785; // 1평 = 3.305785 제곱미터
+    return (squareMeter / conversionRate).toFixed(1);
+};

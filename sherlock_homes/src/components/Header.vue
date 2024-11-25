@@ -45,9 +45,10 @@ const isSelected = (menu, option) => {
     );
 };
 // 메뉴 데이터
+const options = ["매매", "전세/월세"];
 const menus = ref([
-    { label: "아파트", options: ["매매", "전세", "월세"] },
-    { label: "단독 / 다가구", options: ["매매", "전세", "월세"] },
+    { label: "아파트", options: options },
+    { label: "단독 / 다가구", options: options },
 ]);
 
 // 드롭다운 상태 관리

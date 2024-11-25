@@ -31,6 +31,8 @@ export const useMapStore = defineStore("mapStore", {
         aptList: null,
         coordinates: null,
         selectedApt: null,
+        aptDetails: null,
+        aptImg: null,
     }),
     actions: {
         setDistrictData(code) {
@@ -45,5 +47,11 @@ export const useMapStore = defineStore("mapStore", {
         setSelectedApt(selectedApt) {
             this.selectedApt = selectedApt;
         },
+        setAptDetails(aptDetails) {
+            this.aptDetails = aptDetails;
+        },
+        setAptUrl(aptImg) {
+            this.aptImg = aptImg;
+        }
     },
 });

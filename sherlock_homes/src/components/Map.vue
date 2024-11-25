@@ -156,15 +156,32 @@ const neighborhoodApts = async () => {
                             result[0].x
                         );
 
-                        //
-                        const content = `
-                            <div style="padding: 10px; font-size: 14px; background: #fff; border: 0.2px solid var(--primary-color)">
-                                <strong>${apt.aptNm}</strong><br>
-                                <span>가격: ${formatCurrency(
-                                    apt.dealAmount
-                                )}원</span>
-                            </div>
+                        // const content = `
+                        //     <div style="padding: 10px; font-size: 14px; background: #fff; border: 0.2px solid var(--primary-color)">
+                        //         <strong>${apt.aptNm}</strong><br>
+                        //         <span>가격: ${formatCurrency(
+                        //             apt.dealAmount
+                        //         )}원</span>
+                        //     </div>
+                        // `;
+
+                        const content = document.createElement("div");
+                        content.style.padding = "10px";
+                        content.style.fontSize = "14px";
+                        content.style.background = "#fff";
+                        content.style.border =
+                            "0.2px solid var(--primary-color)";
+                        content.innerHTML = `
+                            <strong>${apt.aptNm}</strong><br>
+                            <span>가격: ${formatCurrency(
+                                apt.dealAmount
+                            )}원</span>
                         `;
+
+                        // 이벤트 바인딩
+                        content.addEventListener("click", () => {
+                            alert("test");
+                        });
 
                         const customOverlay = new kakao.maps.CustomOverlay({
                             position: coords,

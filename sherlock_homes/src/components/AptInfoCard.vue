@@ -22,6 +22,7 @@
 </template>
 <script setup>
 import { defineProps, computed } from "vue";
+import { apiClient } from "@/util/Api.js";
 import { useMapStore } from "@/stores/store.js";
 import { formatCurrency } from "@/util/util.js";
 
@@ -38,12 +39,34 @@ const squareMeterToPyeong = (squareMeter) => {
     return (squareMeter / conversionRate).toFixed(1);
 };
 
-const aptDetailsInfo = () => {
-    // TODO: apt 상세정보 api 요청
+const getAptDetailsInfo = async () => {
+    const { aptNm, si, gu, dong } = props.aptData;
+    const apiUrl = `http://3.39.93.101:8081/api/apt/trade/page?offset=0&limit=100&aptName=${aptNm}`;
+    try {
+        const response = await apiClient.get(apiUrl);
+        return response.data.payload;
+    } catch (error) {
+        console.error(`Error fetching data:`, error);
+    }
 };
 
-const clickAptCard = () => {
+const getAptImg = async () => {
+    const { aptNm } = props.aptData;
+    const apiUrl = `http://3.39.93.101:8081/api/apt/trade/page?offset=0&limit=100&aptName=${aptNm}`;
+    try {
+        const response = await apiClient.get(apiUrl);
+        return response.data.payload.imgUrl;
+    } catch (error) {
+        console.error(`Error fetching data:`, error);
+    }
+};
+
+const clickAptCard = async () => {
+    const aptDetails = await getAptDetailsInfo();
+    // const aptImg = await getAptImg();
+    mapStore.setAptDetails(aptDetails);
     mapStore.setSelectedApt(props.aptData);
+    // mapStore.setAptUrl(props.aptImg);
 };
 </script>
 <style scoped>
@@ -60,6 +83,11 @@ const clickAptCard = () => {
     border: 0.2px solid #71717146;
     border-radius: 5px;
     margin-top: 20px;
+    cursor: pointer;
+}
+
+.card:hover {
+    background: #f3f4f6;
 }
 
 .card-header,
