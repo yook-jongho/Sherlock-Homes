@@ -45,6 +45,7 @@ watch(
 <style scoped>
 .container {
     width: 35%;
+    min-width: 400px;
     max-height: calc(100vh - 90px);
     padding: 10px;
     display: flex;
