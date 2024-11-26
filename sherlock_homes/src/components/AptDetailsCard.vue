@@ -24,7 +24,7 @@
             />셜록홈즈의 평가보기
         </div>
         <span v-if="aptReview" class="subTitle">홈즈 평가</span>
-        <AptReview v-if="aptReview" />
+        <AptReview v-if="aptReview" :reviews="aptReview" />
     </div>
 </template>
 
@@ -36,6 +36,7 @@ import { squareMeterToPyeong, formatCurrency } from "@/util/util.js";
 import AptTransHistory from "@/components/AptTransHistory.vue";
 import AptTransGraph from "@/components/AptTransGraph.vue";
 import AptReview from "@/components/AptReview.vue";
+import reviews from "../json/mockup.json";
 
 const mapStore = useMapStore();
 
@@ -46,7 +47,8 @@ const openDetail = () => {
 
 const aptReview = ref();
 const openAptReview = async () => {
-    await getReview();
+    aptReview.value = reviews;
+    // await getReview();
 };
 
 const closeDetail = () => {
