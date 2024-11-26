@@ -52,6 +52,7 @@ const onSelectItem = (item) => {
 }
 
 .itemBox td {
+    width: 100px;
     padding: 10px; /* 셀 내부 간격 */
     border: 1px solid #f5f5f5; /* 셀 테두리 */
     font-size: small;

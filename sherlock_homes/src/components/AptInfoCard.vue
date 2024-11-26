@@ -16,7 +16,6 @@
                 {{ aptData.floor }} 층 /
                 {{ squareMeterToPyeong(aptData.exduUseAr) }}평</span
             >
-            <button @click="">detail</button>
         </div>
     </div>
 </template>

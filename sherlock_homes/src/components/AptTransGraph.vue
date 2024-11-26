@@ -67,5 +67,6 @@ const options = {
     height: 400px; /* 원하는 높이 */
     position: relative; /* 차트가 컨테이너에 맞게 렌더링되도록 설정 */
     overflow: auto;
+    flex-shrink: 0;
 }
 </style>

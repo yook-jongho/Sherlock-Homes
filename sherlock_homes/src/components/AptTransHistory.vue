@@ -1,5 +1,5 @@
 <template>
-    <div style="height: 400px; overflow: auto">
+    <div style="height: 400px; overflow: auto; flex-shrink: 0">
         <table style="width: 100%">
             <thead>
                 <tr>
@@ -18,7 +18,7 @@
                     </td>
                     <td>{{ detail.floor }}</td>
                     <td>{{ squareMeterToPyeong(detail.exduUseAr) }}</td>
-                    <td>{{ formatCurrency(detail.dealAmount) }}만원</td>
+                    <td>{{ formatCurrency(detail.dealAmount) }}</td>
                 </tr>
             </tbody>
         </table>
