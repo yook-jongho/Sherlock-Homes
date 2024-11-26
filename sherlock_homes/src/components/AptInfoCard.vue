@@ -50,8 +50,8 @@ const getAptDetailsInfo = async () => {
 };
 
 const getAptImg = async () => {
-    const { aptNm } = props.aptData;
-    const apiUrl = `http://3.39.93.101:8081/api/apt/trade/page?offset=0&limit=100&aptName=${aptNm}`;
+    const { aptNm, si, gu, dong } = props.aptData;
+    const apiUrl = `http://3.39.93.101:8086/api/ai/gpt/img/${si}/${gu}/${dong}/${aptNm}`;
     try {
         const response = await apiClient.get(apiUrl);
         return response.data.payload.imgUrl;

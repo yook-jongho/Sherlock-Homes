@@ -3,8 +3,9 @@
         <div class="image-container">
             <img
                 class="aptImg"
-                src="https://cdn.creazilla.com/emojis/56704/office-building-emoji-clipart-lg.png"
+                src="https://www.hapt.co.kr/news/photo/202305/158843_29118_1852.jpg"
             />
+            <!-- TODO src="mapStore.aptImg" -->
             <button class="back-button" @click="closeDetail">뒤로가기</button>
         </div>
         <div class="header">
